@@ -13,27 +13,41 @@ enum ProgramMode {
 
 
 // === Data Structures =================================================================================================
-/** Struct for maintaining program's internal state. */
-struct ProgramState {
-    // Files
-    char * romFile,
-         * patchFile,
-         * outputFile;
-    // Program flags
-    unsigned int mode,
-                 helpFlag;
-};
 /**
  * @struct ProgramState romPatcher.h "inc/romPatcher.h"
  * @brief Maintains the internal state of the program.
- * 
- * @property "char *" romFile
- * @property "char *" patchFile
- * @property "char *" outputFile
- * 
- * @property "unsigned int" mode
- * @property "unsigned int" helpFlag
  */
+struct ProgramState {
+    // Files
+    char * romFile,         /**
+                             * char * romFile 
+                             * In patch mode, this parameter stores the base ROM file the patch will be applied to.
+                             * In generate mode, this is the template ROM against which the modified ROM will be
+                             * compared.
+                             */
+         * patchFile,       /**
+                             * char * patchFile
+                             * In patch mode, this parameter stores the patch file to be applied to the ROM.
+                             * In generate mode, this is the modified ROM that will compared against the template to
+                             * create a patch file.
+                             */
+         * outputFile;      /**
+                             * char * outputFile
+                             * The file resulting from the patch or generation operation using the given input files.
+                             */
+    // Program flags
+    unsigned int mode,      /**
+                             * unsigned int mode
+                             * The current operation mode of the program.
+                             * @see ProgramMode
+                             */
+                 helpFlag;  /**
+                             * unsigned int helpFlag
+                             * Triggers the help menu to be displayed to the user.
+                             * Functionally acts as a boolean.
+                             * @see printHelp
+                             */
+};
 
 
 // === Function Prototypes =============================================================================================
