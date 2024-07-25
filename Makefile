@@ -1,30 +1,25 @@
+# === Compiler Options =================================================================================================
 CC=gcc
 CFLAGS=-c -Wall -pedantic
 
+
+# === File Directories =================================================================================================
 INC=./inc
 SRC=./src
 BLD=./build
 
-EXE=romPatcher
-
-OBJECTS=main.o endian.o romPatcher.o
 
 # === Program Target ===================================================================================================
+OBJECTS=main.o endian.o romPatcher.o
+EXE=patcher
+
 all: $(OBJECTS)
 	$(CC) $(BLD)/*.o -o $(BLD)/$(EXE)
 
 
 # === Source File Targets ==============================================================================================
-#main.o: $(SRC)/main.c $(INC)/romPatcher.h
-#	$(CC) $(CFLAGS) $< -o $(BLD)/$@ -I$(INC)
-#
-#endian.o: $(SRC)/endian.c $(INC)/endian.h
-#	$(CC) $(CFLAGS) $< -o $(BLD)/$@ -I$(INC)
 $(OBJECTS): %.o: $(SRC)/%.c
 	$(CC) $(CFLAGS) $^ -o $(BLD)/$@ -I$(INC)
-
-%.c:
-	echo $@
 
 
 # === Utility Targets ==================================================================================================

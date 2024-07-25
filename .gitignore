@@ -1,1 +1,6 @@
+# Directories for building and testing
 build
+test
+
+# This will be removed from this file once documentation is in a better state.
+docs
