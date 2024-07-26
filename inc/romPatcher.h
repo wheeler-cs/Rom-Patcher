@@ -1,6 +1,8 @@
 #ifndef ROM_PATCHER_H
 #define ROM_PATCHER_H
 
+#include <stdio.h>
+
 // === Constants =======================================================================================================
 #define PROGRAM_VERSION "0.0.1"
 
@@ -9,6 +11,12 @@ enum ProgramMode {
     MODE_NOP,            /** Initial program state (does nothing). */
     MODE_APPLY_PATCH,    /** Apply a patch to a file. */
     MODE_GENERATE_PATCH, /** Generate patch from two input files. */
+};
+
+/** Enumeration describing the patching format currently in use. */
+enum PatchType {
+    PATCH_IPS,  /** Internal Patching System */
+    PATCH_UPS,  /** Universal Patching System */
 };
 
 
@@ -21,32 +29,36 @@ struct ProgramState {
     // Files
     char * romFile,         /**
                              * char * romFile 
-                             * In patch mode, this parameter stores the base ROM file the patch will be applied to.
-                             * In generate mode, this is the template ROM against which the modified ROM will be
-                             * compared.
+                             * In both patch and generate mode, this is the base ROM file from which either a patch or
+                             * a patched file will result.
                              */
          * patchFile,       /**
                              * char * patchFile
                              * In patch mode, this parameter stores the patch file to be applied to the ROM.
-                             * In generate mode, this is the modified ROM that will compared against the template to
-                             * create a patch file.
+                             * In generate mode, this is the resulting patch from the comparison operation.
                              */
          * outputFile;      /**
                              * char * outputFile
-                             * The file resulting from the patch or generation operation using the given input files.
+                             * In patch mode, this is the resulting patched rom.
+                             * In generate mode, this is the ROM that has had modifications applied to it.
                              */
     // Program flags
-    unsigned int mode,      /**
-                             * unsigned int mode
-                             * The current operation mode of the program.
-                             * @see ProgramMode
-                             */
-                 helpFlag;  /**
-                             * unsigned int helpFlag
-                             * Triggers the help menu to be displayed to the user.
-                             * Functionally acts as a boolean.
-                             * @see printHelp
-                             */
+    unsigned int helpFlag;      /**
+                                 * unsigned int helpFlag
+                                 * Triggers the help menu to be displayed to the user.
+                                 * Functionally acts as a boolean.
+                                 * @see printHelp
+                                 */
+    enum ProgramMode mode;      /**
+                                 * unsigned int mode
+                                 * The current operation mode of the program.
+                                 * @see ProgramMode
+                                 */
+    enum PatchType patchType;   /** 
+                                 * unsigned int patchType
+                                 * The format of the patch file being handled.
+                                 * @see PatchType
+                                 */
 };
 
 
@@ -68,6 +80,8 @@ void printHelp();
  * 
  * @returns A program state initialized using the arguments passed in via the command line.
  * @retval NULL An issue has occurred when attempting to initialize the program state.
+ * 
+ * @post If initialization is successful, memory will be allocated for the program state and the pointer returned.
  */ 
 struct ProgramState * programInit(int, char **);
 
@@ -82,6 +96,23 @@ struct ProgramState * programInit(int, char **);
  * 
  */
 void initProgramState(struct ProgramState *);
+
+
+/**
+ * 
+ */
+void runPatcher(struct ProgramState *);
+
+
+/**
+ * 
+ */
+void applyPatch(FILE *, FILE *, FILE *, enum PatchType);
+
+/**
+ * 
+ */
+void generatePatch(FILE *, FILE *, FILE *, enum PatchType);
 
 
 #endif

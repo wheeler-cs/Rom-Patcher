@@ -10,7 +10,7 @@ BLD=./build
 
 
 # === Program Target ===================================================================================================
-OBJECTS=main.o endian.o romPatcher.o
+OBJECTS=main.o endian.o patching.o romPatcher.o
 EXE=patcher
 
 all: $(OBJECTS)

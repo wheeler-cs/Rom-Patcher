@@ -1,10 +1,9 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "romPatcher.h"
 #include "endian.h"
-
+#include "patching.h"
 
 
 void printHelp()
@@ -20,6 +19,10 @@ void printHelp()
 
 struct ProgramState * programInit(int argc, char ** argv)
 {
+    // Print header
+    printf("ROM Patcher, %s", PROGRAM_VERSION);
+    fflush(stdout); // fprintf will output to stderr before printf can print without this
+
     // Validate endianness of host machine
     // NOTE: I am not sure if this is needed or not. I do not know how much C abstracts away from the host machine's
     //       architecture, and this is just a precaution.
@@ -27,7 +30,7 @@ struct ProgramState * programInit(int argc, char ** argv)
     {
         // For now just prints error and exits; should ask if should continue regardless
         // TODO: Ask if should continue, regardless of architecture
-        fprintf(stderr, "System is not little endian. Program execution cannot continue safely.");
+        fprintf(stderr, "\nSystem is not little endian. Program execution cannot continue safely.");
         return NULL;
     }
 
@@ -39,31 +42,52 @@ struct ProgramState * programInit(int argc, char ** argv)
     unsigned int i;
     for(i = 1; i < argc; i++)
     {
-        // Handle options that use only a flag
-        if(!strcmp(argv[i], "-h"))
+        // Handle arguments that use `-`
+        if((strlen(argv[i]) == 2) && (argv[i][0] == '-'))
         {
-            // Help flag immediately assumes all other arguments are meaningless
-            pState->helpFlag = 1;
-            break;
+            switch(argv[i][1]) {
+                case 'h':       // Help Information
+                    pState->helpFlag = 1;
+                    break;
+                case 'i':       // In File (needs parameter)
+                    if(argc > (i + 1))
+                    {
+                        pState->romFile = argv[i + 1];
+                        i++;
+                    }
+                    else
+                    {
+                        fprintf(stderr, "\nFlag '-i' is missing argument.");
+                    }
+                    break;
+                case 'p':       // Patch File (needs parameter)
+                    if(argc > (i + 1))
+                    {
+                        pState->patchFile = argv[i + 1];
+                        i++;
+                    }
+                    else
+                    {
+                        fprintf(stderr, "\nFlag '-p' is missing argument.");
+                    }
+                    break;
+                case 'o':       // Out File (needs parameter)
+                    if(argc > (i + 1))
+                    {
+                        pState->outputFile = argv[i + 1];
+                        i++;
+                    }
+                    else
+                    {
+                        fprintf(stderr, "\nFlag '-o' is missing argument.");
+                    }
+                    break;
+                default:        // Unknown/unhandled argument
+                    fprintf(stderr, "\nUnknown argument -%c", argv[i][1]);
+            }
         }
-        // Handle options that require following entries
-        if(argc > (i + 1))
-        {
-            if(!strcmp(argv[i], "-i"))
-            {
-                pState->romFile = argv[i + 1];
-                i++;
-            }
-            else if(!strcmp(argv[i], "-p"))
-            {
-                pState->patchFile = argv[i + 1];
-                i++;
-            }
-            else if(!strcmp(argv[i], "-o"))
-            {
-                pState->outputFile = argv[i + 1];
-                i++;
-            }
+        else {
+            fprintf(stderr, "Unknown argument %s", argv[i]);
         }
     }
 
@@ -78,4 +102,59 @@ void initProgramState(struct ProgramState * pState)
     pState->outputFile = "out.rom";
     pState->mode = MODE_NOP;
     pState->helpFlag = 0;
+}
+
+
+void runPatcher(struct ProgramState * pState)
+{
+    // No mode specified, just quit
+    if(pState->mode == MODE_NOP)
+        return;
+    
+    // Setup file streams
+    FILE * romFileStream,
+         * patchFileStream,
+         * outputFileStream;
+    romFileStream = fopen(pState->romFile, "rb"); // ROM is always read-only
+    // TODO: Add error-handling for files streams not opened properly
+    if(pState->mode == MODE_APPLY_PATCH)
+    {
+        // Reading from patch to modifed ROM
+        patchFileStream = fopen(pState->patchFile, "rb");
+        outputFileStream = fopen(pState->outputFile, "wb");
+        applyPatch(romFileStream, patchFileStream, outputFileStream, pState->patchType);
+    }
+    else // Implied if(pState->mode == MODE_GENERATE_PATCH)
+    {
+        // Reading from modified ROM to patch
+        patchFileStream = fopen(pState->patchFile, "wb");
+        outputFileStream = fopen(pState->outputFile, "rb");
+        generatePatch(romFileStream, outputFileStream, patchFileStream, pState->patchType);
+    }
+
+    // Close file streams to prevent memory leak
+    fclose(romFileStream);
+    fclose(patchFileStream);
+    fclose(outputFileStream);
+}
+
+
+void applyPatch(FILE * referenceROM, FILE * patchData, FILE * outputROM, enum PatchType patchFormat)
+{
+    switch(patchFormat)
+    {
+        case PATCH_IPS:
+            break;
+        case PATCH_UPS:
+            patchUPS(referenceROM, patchData, outputROM);
+            break;
+        default:
+            break;
+    }
+}
+
+
+void generatePatch(FILE * referenceROM, FILE * modifiedROM, FILE * outputPatch, enum PatchType patchFormat)
+{
+
 }
