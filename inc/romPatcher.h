@@ -4,19 +4,28 @@
 #include <stdio.h>
 
 // === Constants =======================================================================================================
+/**
+ * @def PROGRAM_VERSION
+ * The current version of the program represented as a C-string.
+ */
 #define PROGRAM_VERSION "0.0.1"
 
 /** Enumeration identifying current program state. */
 enum ProgramMode {
-    MODE_NOP,            /** Initial program state (does nothing). */
-    MODE_APPLY_PATCH,    /** Apply a patch to a file. */
-    MODE_GENERATE_PATCH, /** Generate patch from two input files. */
+    /** Initial program state (does nothing). */
+    MODE_NOP,
+    /** Apply a patch to a file. */
+    MODE_APPLY_PATCH,
+    /** Generate patch from two input files. */
+    MODE_GENERATE_PATCH,
 };
 
 /** Enumeration describing the patching format currently in use. */
 enum PatchType {
-    PATCH_IPS,  /** Internal Patching System */
-    PATCH_UPS,  /** Universal Patching System */
+    /** Internal Patching System */
+    PATCH_IPS,
+    /** Universal Patching System */
+    PATCH_UPS,
 };
 
 
@@ -27,38 +36,44 @@ enum PatchType {
  */
 struct ProgramState {
     // Files
-    char * romFile,         /**
-                             * char * romFile 
-                             * In both patch and generate mode, this is the base ROM file from which either a patch or
-                             * a patched file will result.
-                             */
-         * patchFile,       /**
-                             * char * patchFile
-                             * In patch mode, this parameter stores the patch file to be applied to the ROM.
-                             * In generate mode, this is the resulting patch from the comparison operation.
-                             */
-         * outputFile;      /**
-                             * char * outputFile
-                             * In patch mode, this is the resulting patched rom.
-                             * In generate mode, this is the ROM that has had modifications applied to it.
-                             */
+    /** 
+     * In both patch and generate mode, this is the base ROM file from which either a patch or
+     * a patched file will result.
+     */
+    char * romFile,
+         /**
+          * In patch mode, this parameter stores the patch file to be applied to the ROM.
+          * In generate mode, this is the resulting patch from the comparison operation.
+          */
+         * patchFile,
+         /**
+          * In patch mode, this is the resulting patched rom.
+          * In generate mode, this is the ROM that has had modifications applied to it.
+          */
+         * outputFile;
+
     // Program flags
-    unsigned int helpFlag;      /**
-                                 * unsigned int helpFlag
-                                 * Triggers the help menu to be displayed to the user.
-                                 * Functionally acts as a boolean.
-                                 * @see printHelp
-                                 */
-    enum ProgramMode mode;      /**
-                                 * unsigned int mode
-                                 * The current operation mode of the program.
-                                 * @see ProgramMode
-                                 */
-    enum PatchType patchType;   /** 
-                                 * unsigned int patchType
-                                 * The format of the patch file being handled.
-                                 * @see PatchType
-                                 */
+    /**
+     * unsigned int helpFlag
+     * Triggers the help menu to be displayed to the user.
+     * Functionally acts as a boolean.
+     * @see printHelp
+     */
+    unsigned int helpFlag;
+
+    /**
+     * unsigned int mode
+     * The current operation mode of the program.
+     * @see ProgramMode
+     */
+    enum ProgramMode mode;
+
+    /** 
+     * unsigned int patchType
+     * The format of the patch file being handled.
+     * @see PatchType
+     */
+    enum PatchType patchType;
 };
 
 

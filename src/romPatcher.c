@@ -19,10 +19,6 @@ void printHelp()
 
 struct ProgramState * programInit(int argc, char ** argv)
 {
-    // Print header
-    printf("ROM Patcher, %s", PROGRAM_VERSION);
-    fflush(stdout); // fprintf will output to stderr before printf can print without this
-
     // Validate endianness of host machine
     // NOTE: I am not sure if this is needed or not. I do not know how much C abstracts away from the host machine's
     //       architecture, and this is just a precaution.
@@ -48,6 +44,13 @@ struct ProgramState * programInit(int argc, char ** argv)
             switch(argv[i][1]) {
                 case 'h':       // Help Information
                     pState->helpFlag = 1;
+                    i = argc + 1;
+                    break;
+                case 'a':
+                    pState->mode = MODE_APPLY_PATCH;
+                    break;
+                case 'g':
+                    pState->mode = MODE_GENERATE_PATCH;
                     break;
                 case 'i':       // In File (needs parameter)
                     if(argc > (i + 1))
@@ -107,9 +110,19 @@ void initProgramState(struct ProgramState * pState)
 
 void runPatcher(struct ProgramState * pState)
 {
+    // Just print the help menu and exit
+    if(pState->helpFlag)
+    {
+        printHelp();
+        return;
+    }
+
     // No mode specified, just quit
     if(pState->mode == MODE_NOP)
+    {
+        fprintf(stderr, "\nPlease specify if patch should be applied (-a) or generated (-g) when calling patcher.");
         return;
+    }
     
     // Setup file streams
     FILE * romFileStream,
@@ -141,16 +154,22 @@ void runPatcher(struct ProgramState * pState)
 
 void applyPatch(FILE * referenceROM, FILE * patchData, FILE * outputROM, enum PatchType patchFormat)
 {
+    unsigned int applySuccess = 0;
+    patchFormat = PATCH_UPS;
     switch(patchFormat)
     {
         case PATCH_IPS:
             break;
         case PATCH_UPS:
-            patchUPS(referenceROM, patchData, outputROM);
+            applySuccess = patchUPS(referenceROM, patchData, outputROM);
             break;
         default:
+            applySuccess = 0;
             break;
     }
+    // TODO: Make error-handling here better
+    if(!applySuccess)
+        fprintf(stderr, "\nCould not apply patch.");
 }
 
 

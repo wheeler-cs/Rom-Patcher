@@ -13,7 +13,8 @@ int main(int argc, char ** argv)
         printHelp();
         return 1;
     }
-    
+
+    runPatcher(programState);
 
     // Clean up
     free(programState);
