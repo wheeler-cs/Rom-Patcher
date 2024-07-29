@@ -1,3 +1,5 @@
 # Directories for building and testing
 build
 test
+
+*.pdf

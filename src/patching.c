@@ -23,7 +23,7 @@ unsigned int verifySignature(FILE * patchData, const uint8_t * signature, unsign
     // Clean up and return
     fseek(patchData, 0, SEEK_SET);
     free(signatureBuffer);
-    signatureBuffer = NULL;
+    signatureBuffer = NULL; // Dangling pointer
     return !(result); // Negate the result because want 0 to indicate failure, but strcmp indicates 0 as success
 }
 
@@ -38,4 +38,29 @@ unsigned int patchUPS(FILE * referenceROM, FILE * patchData, FILE * outputROM)
 }
 
 
+uint64_t readEncodedNumber(FILE * patchData)
+{
+    // Code adapted from http://justsolve.archiveteam.org/wiki/UPS_(binary_patch_format)
 
+    // Set file pointer to appropriate position
+    fseek(patchData, SIGNATURE_LENGTH_UPS, SEEK_SET);
+
+    uint64_t value = 0,
+             shift = 0;
+    uint8_t octet = 0;
+
+    // Read encoded integer from file
+    do
+    {
+        octet = fgetc(patchData);
+        if(octet & 0x80) // End of chunk has been reached
+        {
+            value += (octet & 0x7f) << shift;
+            break;
+        }
+        value += (octet | 0x80) << shift;
+        shift += 7;
+    } while(1);
+
+    return value;
+}

@@ -48,4 +48,9 @@ extern const uint8_t FILE_SIGNATURE_UPS[];
  */
 unsigned int patchUPS(FILE *, FILE *, FILE *);
 
+/**
+ * 
+ */
+uint64_t readEncodedNumber(FILE *);
+
 #endif
