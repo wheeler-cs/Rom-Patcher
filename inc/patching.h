@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 
+// === Constants =======================================================================================================
 // Defines are used here because `sizeof` wasn't getting the size of the arrays properly
 /**
  * @def SIGNATURE_LENGTH_IPS
@@ -19,6 +20,25 @@
  * @see patching.c
  */
 #define SIGNATURE_LENGTH_UPS 4
+
+
+// === Data Structures =================================================================================================
+/**
+ * @todo
+ */
+struct PatchMetadata
+{
+    // File size information
+    unsigned int sourceSize,
+                 destinationSize;
+
+    // CRC32 checksums of related files
+    uint32_t sourceChecksum,
+             destinationChecksum,
+             patchChecksum;
+
+    unsigned int validatedSignature;
+};
 
 
 // === Reusable Functions ==============================================================================================
@@ -44,12 +64,27 @@ extern const uint8_t FILE_SIGNATURE_IPS[];
 extern const uint8_t FILE_SIGNATURE_UPS[];
 
 /**
- * 
+ * @todo
+ */
+unsigned int validateUPS(FILE *);
+
+/**
+ * @todo
  */
 unsigned int patchUPS(FILE *, FILE *, FILE *);
 
 /**
+ * Reads in a variable-width integer from the given file stream and converts it to fixed-width.
  * 
+ * @pre The provided file pointer must be opened in "rb" mode.
+ * @pre The provided file pointer must be positioned to the start of the number beforehand.
+ * 
+ * @param[in] patchData An active file pointer associated with a file containing encoded numbers.
+ * 
+ * @returns The variable-width value read from the file stream as a fixed-width unsigned integer.
+ * 
+ * @note The file pointer is moved during this operation and is not reset to the position it was at at the beginning of
+ *       the function call.
  */
 uint64_t readEncodedNumber(FILE *);
 

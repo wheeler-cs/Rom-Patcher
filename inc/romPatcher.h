@@ -114,18 +114,18 @@ void initProgramState(struct ProgramState *);
 
 
 /**
- * 
+ * @todo
  */
 void runPatcher(struct ProgramState *);
 
 
 /**
- * 
+ * @todo
  */
 void applyPatch(FILE *, FILE *, FILE *, enum PatchType);
 
 /**
- * 
+ * @todo
  */
 void generatePatch(FILE *, FILE *, FILE *, enum PatchType);
 

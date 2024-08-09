@@ -28,10 +28,24 @@ unsigned int verifySignature(FILE * patchData, const uint8_t * signature, unsign
 }
 
 
-unsigned int patchUPS(FILE * referenceROM, FILE * patchData, FILE * outputROM)
+unsigned int validateUPS(FILE * patchData)
 {
     // Check that the UPS signature is present
     if(!(verifySignature(patchData, FILE_SIGNATURE_UPS, SIGNATURE_LENGTH_UPS)))
+        return 0;
+
+    uint64_t referenceROMSize,
+             outputROMSize;
+    
+    fseek(patchData, SIGNATURE_LENGTH_UPS, SEEK_SET); // Position file pointer to number
+    referenceROMSize = readEncodedNumber(patchData);
+    outputROMSize = readEncodedNumber(patchData);
+}
+
+
+unsigned int patchUPS(FILE * referenceROM, FILE * patchData, FILE * outputROM)
+{
+    if(!(validateUPS(patchData)))
         return 0;
 
     return 1;
@@ -41,9 +55,6 @@ unsigned int patchUPS(FILE * referenceROM, FILE * patchData, FILE * outputROM)
 uint64_t readEncodedNumber(FILE * patchData)
 {
     // Code adapted from http://justsolve.archiveteam.org/wiki/UPS_(binary_patch_format)
-
-    // Set file pointer to appropriate position
-    fseek(patchData, SIGNATURE_LENGTH_UPS, SEEK_SET);
 
     uint64_t value = 0,
              shift = 0;

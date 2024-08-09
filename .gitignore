@@ -2,4 +2,7 @@
 build
 test
 
+# Docs are currently a mess right now
+docs
+
 *.pdf
