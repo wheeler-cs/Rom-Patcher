@@ -40,13 +40,42 @@ unsigned int validateUPS(FILE * patchData)
     fseek(patchData, SIGNATURE_LENGTH_UPS, SEEK_SET); // Position file pointer to number
     referenceROMSize = readEncodedNumber(patchData);
     outputROMSize = readEncodedNumber(patchData);
+
+    return 1;
 }
 
 
 unsigned int patchUPS(FILE * referenceROM, FILE * patchData, FILE * outputROM)
 {
-    if(!(validateUPS(patchData)))
+    // Ensure the patch is valid before applying it
+    struct PatchMetadata patchingInfo;
+    if(!(patchingInfo.validatedSignature = validateUPS(patchData)))
         return 0;
+
+    // Read the size of the input ROM and expected output of new ROM
+    fseek(patchData, SIGNATURE_LENGTH_UPS, SEEK_SET);
+    patchingInfo.sourceSize = readEncodedNumber(patchData);
+    patchingInfo.destinationSize = readEncodedNumber(patchData);
+
+    // Read blocks of data from the patch until (EOF - 12 bytes) is reached
+    unsigned int skippedBytes, i;
+    uint8_t octet, xorOctet;
+    while(!(feof(patchData) || feof(referenceROM)))
+    {
+        skippedBytes = readEncodedNumber(patchData);
+        for(i = 0; i < skippedBytes; i++)
+        {
+            octet = fgetc(referenceROM);
+            fputc(octet, outputROM);
+        }
+        while((octet = fgetc(patchData)) != 0x00)
+        {
+            xorOctet = fgetc(referenceROM);
+            fputc((octet ^ xorOctet), outputROM);
+        }
+        xorOctet = fgetc(referenceROM);
+        fputc((octet ^ xorOctet), outputROM);
+    }
 
     return 1;
 }
